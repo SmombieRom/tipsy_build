@@ -251,6 +251,250 @@ DISABLE_SANITIZE_LEAK := \
 	$(NOOP_BLUETOOTH) \
 	$(NO_OPTIMIZATIONS)
 
+##############
+# IPA Analyser
+##############
+ifeq ($(ENABLE_IPA_ANALYSER),true)
+LOCAL_DISABLE_IPA :=
+
+ ifeq (,$(filter true,$(LOCAL_CLANG)))
+   ifneq (1,$(words $(filter $(LOCAL_DISABLE_IPA),$(LOCAL_MODULE))))
+     ifdef LOCAL_CFLAGS
+       LOCAL_CFLAGS += -fipa-sra -fipa-pta -fipa-cp -fipa-cp-clone
+     else
+       LOCAL_CFLAGS := -fipa-sra -fipa-pta -fipa-cp -fipa-cp-clone
+     endif
+     ifdef LOCAL_LDFLAGS
+       LOCAL_LDFLAGS += -fipa-sra -fipa-pta -fipa-cp -fipa-cp-clone
+     else
+       LOCAL_LDFLAGS := -fipa-sra -fipa-pta -fipa-cp -fipa-cp-clone
+     endif
+   endif
+ endif
+endif
+
+#########
+# pthread
+######%#%
+ifeq ($(ENABLE_PTHREAD),true)
+LOCAL_DISABLE_PTHREAD := \
+	libc_netbsd \
+	libc_tzcode \
+	$(NOOP_BLUETOOTH) \
+	$(NO_OPTIMIZATIONS)
+
+ ifeq ($(filter $(LOCAL_DISABLE_PTHREAD), $(LOCAL_MODULE)),)
+  ifdef LOCAL_CONLYFLAGS
+   LOCAL_CFLAGS += -pthread
+  else
+   LOCAL_CFLAGS := -pthread
+  endif
+  ifdef LOCAL_CPPFLAGS
+   LOCAL_CPPFLAGS += -pthread
+  else
+   LOCAL_CPPFLAGS := -pthread
+  endif
+ endif
+endif
+
+
+########
+# OpenMP
+########
+ifeq ($(ENABLE_GOMP),true)
+LOCAL_DISABLE_GOMP := \
+	libc_tzcode \
+	libscrypt_static \
+	libperfprofdcore \
+	libperfprofdutils \
+	perfprofd \
+	libv8_32 \
+	libv8 \
+	$(NOOP_BLUETOOTH) \
+	$(NO_OPTIMIZATIONS)
+
+ ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+  ifneq ($(strip $(LOCAL_IS_HOST_MODULE)),true)
+   ifneq ($(strip $(LOCAL_CLANG)),true)
+    ifeq ($(filter $(LOCAL_DISABLE_GOMP), $(LOCAL_MODULE)),)
+     ifdef LOCAL_CFLAGS
+      LOCAL_CFLAGS += -lgomp -ldl -lgcc -fopenmp
+     else
+      LOCAL_CFLAGS := -lgomp -ldl -lgcc -fopenmp
+     endif
+     ifdef LOCAL_LDLIBS
+      LOCAL_LDLIBS += -lgomp -lgcc
+     else
+      LOCAL_LDLIBS := -lgomp -lgcc
+     endif
+    endif
+   endif
+  endif
+ endif
+endif
+
+######%#%%%%#
+# Extra flags
+#######%%%%%%
+ifeq ($(ENABLE_EXTRAGCC),true)
+LOCAL_DISABLE_EXTRAGCC := \
+	libc_tzcode \
+	libbinder \
+	libjemalloc \
+	libmediandk \
+	$(NOOP_BLUETOOTH) \
+	$(NO_OPTIMIZATIONS)
+
+ ifndef LOCAL_IS_HOST_MODULE
+  ifeq ($(LOCAL_CLANG),)
+   ifneq (1,$(words $(filter $(LOCAL_DISABLE_EXTRAGCC), $(LOCAL_MODULE))))
+    ifdef LOCAL_CONLYFLAGS
+     LOCAL_CONLYFLAGS += \
+	-frerun-cse-after-loop \
+	-frename-registers \
+	-ffunction-sections \
+	-fdata-sections \
+	-fgcse-las \
+	-fgcse-sm \
+	-fipa-pta \
+	-fivopts \
+	-fweb \
+	-fomit-frame-pointer \
+	-frename-registers \
+	-fsection-anchors \
+	-ftracer \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-funsafe-loop-optimizations \
+	-funswitch-loops \
+	-fira-loop-pressure \
+	-fforce-addr \
+	-funroll-loops \
+	-ftree-loop-distribution \
+	-fsection-anchors \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-ffunction-sections \
+	-ffp-contract=fast \
+	-Wno-unused-parameter \
+	-Wno-unused-but-set-variable \
+	-Wno-maybe-uninitialized \
+	-Wno-error=array-bounds \
+	-Wno-error=clobbered \
+	-Wno-error=maybe-uninitialized \
+	-Wno-error=strict-overflow
+    else
+     LOCAL_CONLYFLAGS := \
+	-frerun-cse-after-loop \
+	-frename-registers \
+	-ffunction-sections \
+	-fdata-sections \
+	-fgcse-las \
+	-fgcse-sm \
+	-fipa-pta \
+	-fivopts \
+	-fweb \
+	-fomit-frame-pointer \
+	-frename-registers \
+	-fsection-anchors \
+	-ftracer \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-funsafe-loop-optimizations \
+	-funswitch-loops \
+	-fira-loop-pressure \
+	-fforce-addr \
+	-funroll-loops \
+	-ftree-loop-distribution \
+	-fsection-anchors \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-ffunction-sections \
+	-ffp-contract=fast \
+	-Wno-unused-parameter \
+	-Wno-unused-but-set-variable \
+	-Wno-maybe-uninitialized \
+	-Wno-error=array-bounds \
+	-Wno-error=clobbered \
+	-Wno-error=maybe-uninitialized \
+	-Wno-error=strict-overflow
+    endif
+    ifdef LOCAL_CPPFLAGS
+     LOCAL_CPPFLAGS += \
+	-frerun-cse-after-loop \
+	-frename-registers \
+	-ffunction-sections \
+	-fdata-sections \
+	-fgcse-las \
+	-fgcse-sm \
+	-fipa-pta \
+	-fivopts \
+	-fweb \
+	-fomit-frame-pointer \
+	-frename-registers \
+	-fsection-anchors \
+	-ftracer \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-funsafe-loop-optimizations \
+	-funswitch-loops \
+	-fira-loop-pressure \
+	-fforce-addr \
+	-funroll-loops \
+	-ftree-loop-distribution \
+	-fsection-anchors \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-ffunction-sections \
+	-ffp-contract=fast \
+	-Wno-unused-parameter \
+	-Wno-unused-but-set-variable \
+	-Wno-maybe-uninitialized \
+	-Wno-error=array-bounds \
+	-Wno-error=clobbered \
+	-Wno-error=maybe-uninitialized \
+	-Wno-error=strict-overflow
+    else
+     LOCAL_CPPFLAGS := \
+	-frerun-cse-after-loop \
+	-frename-registers \
+	-ffunction-sections \
+	-fdata-sections \
+	-fgcse-las \
+	-fgcse-sm \
+	-fipa-pta \
+	-fivopts \
+	-fweb \
+	-fomit-frame-pointer \
+	-frename-registers \
+	-fsection-anchors \
+	-ftracer \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-funsafe-loop-optimizations \
+	-funswitch-loops \
+	-fira-loop-pressure \
+	-fforce-addr \
+	-funroll-loops \
+	-ftree-loop-distribution \
+	-fsection-anchors \
+	-ftree-loop-im \
+	-ftree-loop-ivcanon \
+	-ffunction-sections \
+	-ffp-contract=fast \
+	-Wno-unused-parameter \
+	-Wno-unused-but-set-variable \
+	-Wno-maybe-uninitialized \
+	-Wno-error=array-bounds \
+	-Wno-error=clobbered \
+	-Wno-error=maybe-uninitialized \
+	-Wno-error=strict-overflow
+    endif
+   endif
+  endif
+ endif
+endif
+
 ################
 # Cortex Tuning
 ################
